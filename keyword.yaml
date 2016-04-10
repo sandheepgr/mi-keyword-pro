@@ -1,0 +1,74 @@
+keywords:
+- !!com.microideation.app.keywordpro.dictionary.Keyword
+  key: 'REWARDS'
+  fieldSeparator: '/' # separator spliting of the subject (This is the part of the subject after removing the key
+  minFieldCount : 3
+  keywordSubjectFields:
+  - !!com.microideation.app.keywordpro.dictionary.KeywordSubjectField
+    index: 1
+    mandatory: true
+    length: 200
+  - !!com.microideation.app.keywordpro.dictionary.KeywordSubjectField
+    index: 2
+    mandatory: true
+    length: 200
+  - !!com.microideation.app.keywordpro.dictionary.KeywordSubjectField
+    index: 3
+    mandatory: true
+    length: 300
+  - !!com.microideation.app.keywordpro.dictionary.KeywordSubjectField
+    index: 4
+    mandatory: true
+    length: 300
+  - !!com.microideation.app.keywordpro.dictionary.KeywordSubjectField
+    index: 5
+    mandatory: true
+    length: 300
+  apiMethod: 'POST'
+  apiUrl: 'http://localhost:9090'
+  apiMappings:
+   loyaltyId: '#mobile'
+   firstName: '#param1'
+   middleName: '#param2'
+   lastName: '#param3'
+   city: '#param4'
+   province: '#param5'
+   channel: '1'
+  alias:
+  - 'REWARDSK'
+
+- !!com.microideation.app.keywordpro.dictionary.Keyword
+  key: 'POINTS'
+  fieldSeparator: ' ' # separator spliting of the subject (This is the part of the subject after removing the key
+  keywordSubjectFields:
+  apiMethod: 'POST'
+  apiUrl: 'http://localhost:9090'
+  apiMappings:
+   loyaltyId: '#mobile'
+   rwdCurrencyId: '1'
+  alias:
+
+
+- !!com.microideation.app.keywordpro.dictionary.Keyword
+  key: 'REDEEM'
+  fieldSeparator: ' ' # separator spliting of the subject (This is the part of the subject after removing the key
+  keywordSubjectFields:
+  - !!com.microideation.app.keywordpro.dictionary.KeywordSubjectField
+    index: 1
+    mandatory: true
+    length: 200
+  - !!com.microideation.app.keywordpro.dictionary.KeywordSubjectField
+    index: 2
+    mandatory: false
+    length: 200
+  apiMethod: 'POST'
+  apiUrl: 'http://localhost:9090'
+  apiMappings:
+   loyaltyId: '#mobile'
+   prdcode: '#param1'
+   destLoyaltyId: '#param2'
+   quantity: '1'
+  alias:
+
+
+
