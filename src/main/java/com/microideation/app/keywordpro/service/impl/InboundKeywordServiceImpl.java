@@ -53,23 +53,23 @@ public class InboundKeywordServiceImpl implements InboundKeywordService {
      * based on the subject
      *
      * @param mobile        : The sender mobile
-     * @param subject       : The subject content including the keywordpro
+     * @param subject       : The subject content including the keyword
      * @param accessCode    : The Access code for the incoming SMS
      *
      * @return              : Return the status based on the process
      *                        PROCESSED if the sms was processed successfully
-     *                        INVALID_KEYWORD : if the keywordpro is not able to be mapped
-     *                        INVALID_FORMAT  : if the format of the fields is not proper for the keywordpro
+     *                        INVALID_KEYWORD : if the keyword is not able to be mapped
+     *                        INVALID_FORMAT  : if the format of the fields is not proper for the keyword
      */
     public int processInboundSMS(String mobile, String subject, String accessCode) {
 
         // Get the request
         InboundSMSRequest inboundSMSRequest = getInboundSMSRequest(mobile,subject,accessCode);
 
-        // get the keywordpro for the SMS
+        // get the keyword for the SMS
         Keyword keyword = getConfigForKey(subject);
 
-        // If the keywordpro is null, then return invalid keywordpro status
+        // If the keyword is null, then return invalid keyword status
         if ( keyword == null ) {
 
             return InboundSMSKeywordStatus.INVALID_KEYWORD;
@@ -109,7 +109,7 @@ public class InboundKeywordServiceImpl implements InboundKeywordService {
      * Method to get the Configuration for the given key
      * This will search on the sorted list and return the first matching item
      *
-     * @param keyword : The keywordpro string to be searched
+     * @param keyword : The keyword string to be searched
      *
      * @return        : Return the Keyword object if found
      *                  Return null if not found
@@ -119,13 +119,13 @@ public class InboundKeywordServiceImpl implements InboundKeywordService {
         // Get the key
         String key = keywordConfigurationUtil.getMatchingKey(keywordList,keyword);
 
-        // Get the keywordpro
+        // Get the keyword
         Keyword keywordObj = keywordMap.get(key);
 
         // Set the key field in the keywordOb as the key that matched ( this is to include alias as key)
         keywordObj.setKey(key);
 
-        // Return the keywordpro object
+        // Return the keyword object
         return keywordObj;
 
     }
@@ -135,7 +135,7 @@ public class InboundKeywordServiceImpl implements InboundKeywordService {
      * Function to get the InboundSMSRequest object from the params
      *
      * @param mobile        : The sender mobile
-     * @param subject       : The subject content including the keywordpro
+     * @param subject       : The subject content including the keyword
      * @param accessCode    : The Access code for the incoming SMS
      *
      * @return              : The InboundSMSREquest object based on the fields.
@@ -160,7 +160,7 @@ public class InboundKeywordServiceImpl implements InboundKeywordService {
     /**
      * Function to set the meta data fields of the InboundSMSRequest based on the subject
      *
-     * @param keyword           : The identified keywordpro object
+     * @param keyword           : The identified keyword object
      * @param inboundSMSRequest : The InboundSMSRequest object to be updated with
      * @return                  : The InboundSMSREquest after updating the details
      */
@@ -247,7 +247,7 @@ public class InboundKeywordServiceImpl implements InboundKeywordService {
      */
     private boolean isInboundRequestValid(Keyword keyword,InboundSMSRequest request) {
 
-        // Get the subject field config from the keywordpro
+        // Get the subject field config from the keyword
         List<KeywordSubjectField> keywordSubjectFields = keyword.getKeywordSubjectFields();
 
         // Store the fields
@@ -273,8 +273,8 @@ public class InboundKeywordServiceImpl implements InboundKeywordService {
 
         // If there are no explicit configuration, return true
         if ( (keywordSubjectFields == null || keywordSubjectFields.isEmpty()) ||
-             (subjectFields == null || subjectFields.isEmpty() )
-           ) {
+                (subjectFields == null || subjectFields.isEmpty() )
+                ) {
 
             // Log the information
             log.info("No field config to validate");
@@ -380,17 +380,25 @@ public class InboundKeywordServiceImpl implements InboundKeywordService {
 
     }
 
+
     /**
-     * Method to place the API call based on the configuration in the keywordpro and the params
+     * Method to place the API call based on the configuration in the keyword and the params
      * identified from the request
      *
-     * @param keyword           : The keywordpro object to be used for getting the configuration
+     * @param keyword           : The keyword object to be used for getting the configuration
      * @param inboundSMSRequest : The inbound request fields
      *
      * @return                  : Return the response given by the api
      *                            Return null if the API call failed.
      */
     private String placeAPICall(Keyword keyword, InboundSMSRequest inboundSMSRequest ) {
+
+        // Read the url
+        // Create a new string object to not update the url in the keyword
+        String url = new String(keyword.getApiUrl());
+
+        // Get the url after replacing the meta param place holders
+        url = replaceUrlMetaParams(url,keyword,inboundSMSRequest);
 
         // Get the mappings
         HashMap<String,String> mappings = createAPICallMapping(keyword,inboundSMSRequest);
@@ -406,21 +414,24 @@ public class InboundKeywordServiceImpl implements InboundKeywordService {
 
             case "post":
 
-                response = apiService.placeRestPostAPICall(keyword.getApiUrl(),mappings);
+                response = apiService.placeRestPostAPICall(url,mappings);
+                break;
 
             case "get":
 
-                response = apiService.placeRestGetAPICall(keyword.getApiUrl(), mappings);
+                response = apiService.placeRestGetAPICall(url, mappings);
+                break;
 
             case "post-query":
 
-                response = apiService.placeRestPostQueryStringAPICall(keyword.getApiUrl(), mappings);
+                response = apiService.placeRestPostQueryStringAPICall(url, mappings);
+                break;
 
             case "post-json":
 
                 try {
 
-                    response = apiService.placeRestJSONPostAPICall(keyword.getApiUrl(), mapper.writeValueAsString(mappings));
+                    response = apiService.placeRestJSONPostAPICall(url, mapper.writeValueAsString(mappings));
 
                 } catch (JsonProcessingException e) {
 
@@ -439,6 +450,8 @@ public class InboundKeywordServiceImpl implements InboundKeywordService {
                     response = null;
                 }
 
+                break;
+
         }
 
         // Return the response
@@ -448,7 +461,32 @@ public class InboundKeywordServiceImpl implements InboundKeywordService {
 
 
     /**
-     * Method to create the hash params mapping based on the keywordpro and the inboundSMSRequest object
+     * Function to replace the metaparams specified in the url of the item
+     *
+     * @param url               : The url to be updated
+     * @param keyword           : The Keyword object containing the configuration
+     * @param inboundSMSRequest : The inboundSMSRequest object with the meta params
+     * @return
+     */
+    private String replaceUrlMetaParams(String url, Keyword keyword, InboundSMSRequest inboundSMSRequest) {
+
+        // Iterate through the metaparam names and check if the url contains the metaparam key
+        // If the key is present, then replace it with the value from the param.
+        for ( Map.Entry<String,String> entry : inboundSMSRequest.getMetaParams().entrySet() ) {
+
+            // chcek if the url contains the #param
+            url = url.replace(entry.getKey(),entry.getValue());
+
+        }
+
+        // return the url
+        return url;
+
+    }
+
+
+    /**
+     * Method to create the hash params mapping based on the keyword and the inboundSMSRequest object
      *
      * @param keyword           : Keyword object with the names of the fields
      * @param inboundSMSRequest : InboundSMSRequest object containing the values for the fields
@@ -486,3 +524,4 @@ public class InboundKeywordServiceImpl implements InboundKeywordService {
     }
 
 }
+
