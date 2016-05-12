@@ -122,6 +122,12 @@ public class InboundKeywordServiceImpl implements InboundKeywordService {
         // Get the keyword
         Keyword keywordObj = keywordMap.get(key);
 
+        // If the keyword is not found, then return null
+        if(keywordObj == null){
+
+            return null;
+        }
+
         // Set the key field in the keywordOb as the key that matched ( this is to include alias as key)
         keywordObj.setKey(key);
 
@@ -498,6 +504,14 @@ public class InboundKeywordServiceImpl implements InboundKeywordService {
 
         // Create the Hashmap that will hold the details
         HashMap<String,String> mappings = new HashMap<>(0);
+
+        //check whether api mappings is null
+        if(keyword.getApiMappings() == null){
+
+            //return empty mappings
+            return mappings;
+
+        }
 
         // Iterate throught the mappings
         for(Map.Entry<String,String> entry : keyword.getApiMappings().entrySet() ) {
