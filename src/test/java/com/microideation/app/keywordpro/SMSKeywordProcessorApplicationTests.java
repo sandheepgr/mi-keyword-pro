@@ -21,7 +21,7 @@ public class SMSKeywordProcessorApplicationTests {
     @Test
     public void testKeyword() {
 
-        inboundKeywordService.processInboundSMS("9538828853","REWARDS 123","200");
+        inboundKeywordService.processInboundSMS("9538828853","REWARDS +919538828853/test","200");
 
     }
 }

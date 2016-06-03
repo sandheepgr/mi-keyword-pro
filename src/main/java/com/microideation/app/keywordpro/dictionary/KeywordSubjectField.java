@@ -1,5 +1,7 @@
 package com.microideation.app.keywordpro.dictionary;
 
+import java.util.List;
+
 /**
  * Created by sandheepgr on 17/12/15.
  */
@@ -13,6 +15,7 @@ public class KeywordSubjectField {
 
     private String validation = "";
 
+    private List<String> stripCharacters;
 
 
     public boolean isMandatory() {
@@ -47,6 +50,13 @@ public class KeywordSubjectField {
         this.validation = validation;
     }
 
+    public List<String> getStripCharacters() {
+        return stripCharacters;
+    }
+
+    public void setStripCharacters(List<String> stripCharacters) {
+        this.stripCharacters = stripCharacters;
+    }
 
     @Override
     public String toString() {
@@ -55,6 +65,7 @@ public class KeywordSubjectField {
                 ", length=" + length +
                 ", index=" + index +
                 ", validation='" + validation + '\'' +
+                ", stripCharacters=" + stripCharacters +
                 '}';
     }
 }

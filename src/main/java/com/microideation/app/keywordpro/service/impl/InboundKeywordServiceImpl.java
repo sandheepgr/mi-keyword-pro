@@ -79,6 +79,9 @@ public class InboundKeywordServiceImpl implements InboundKeywordService {
         // Enrich,
         inboundSMSRequest = enrichInboundSMSFields(keyword,inboundSMSRequest);
 
+        // strip the characters from the input if specified in the keyword configuration
+        inboundSMSRequest = stripCharacters(keyword,inboundSMSRequest);
+
         // Check the validity
         boolean isValid = isInboundRequestValid(keyword,inboundSMSRequest);
 
@@ -134,6 +137,89 @@ public class InboundKeywordServiceImpl implements InboundKeywordService {
         // Return the keyword object
         return keywordObj;
 
+    }
+
+
+    /**
+     * Method to format the subject field after removing the strip characters
+     *
+     * @param keywordSubjectField   : The KeywordSubjectfield object containing the subject field
+     * @param stringValue           : Keyword subject field value
+     *
+     * @return                      : If the strip characters are specified, then this will return the subject field value
+     *                                after removing the strip characters
+     *                                If nothing is specified, this returns the value as it is
+     */
+    private String formatSubjectField(KeywordSubjectField keywordSubjectField, String stringValue) {
+
+        List<String> stripCharacters = keywordSubjectField.getStripCharacters();
+
+        for(String character : stripCharacters){
+
+            if(stringValue.startsWith(character)){
+
+                stringValue =  stringValue.substring(character.length());
+
+            }
+        }
+
+        return stringValue;
+    }
+
+
+    /**
+     * Strips the invalid character from the input
+     *
+     * For eg: if the input contains 0 or 63 in mobile number but the application
+     * accepts values without 0 or 63 , we need to strip out these additional characters
+     * Method checks the keyword configuration and formats the input data
+     *
+     * @param keyword : Keyword configured in the yaml file
+     * @param inboundSMSRequest  : Incoming request
+     * @return : returns the formatted inboundSMSRequest
+     */
+    private InboundSMSRequest stripCharacters(Keyword keyword, InboundSMSRequest inboundSMSRequest) {
+
+        List<KeywordSubjectField> keywordSubjectFields = keyword.getKeywordSubjectFields();
+
+        // Store the fields
+        List<String> subjectFields = inboundSMSRequest.getSubjectFields();
+
+        //if keyword fields are not empty or null , check the character stripping
+        if(keywordSubjectFields != null){
+
+            //iterate through the keyword fields and find the stripping fields
+            for(KeywordSubjectField keywordSubjectField : keywordSubjectFields){
+
+                //check if any stripping is defined in keyword
+                if(keywordSubjectField.getStripCharacters() !=null && keywordSubjectField.getStripCharacters().size() > 0){
+
+                    int subjectFieldsSize = subjectFields.size();
+
+                    if(keywordSubjectField.getIndex()-1 < subjectFieldsSize ){
+
+                        //strip the keyword ( Format the input)
+                        String formattedField = formatSubjectField(keywordSubjectField,subjectFields.get(keywordSubjectField.getIndex()-1));
+
+                        //add the formatted field to the subject field
+                        subjectFields.set(keywordSubjectField.getIndex()-1,formattedField);
+                    }
+
+
+                }
+
+            }
+
+            //set the subject field to the inbound sms request
+            inboundSMSRequest.setSubjectFields(subjectFields);
+
+            //update the metaparams with the new/updated subject fields
+            inboundSMSRequest = updateMetaParams(keyword,inboundSMSRequest);
+
+        }
+
+        //return the updated inboundSMSRequest after character stripping
+        return inboundSMSRequest;
     }
 
 

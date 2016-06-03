@@ -217,7 +217,15 @@ public class KeywordConfigurationUtil {
             // Check if the key is the starting of the subject
             if ( compare.startsWith(key) ) {
 
-                return key;
+                // Check if the key is valid
+                if(isKeywordValid(compare,key)){
+
+                    return key;
+
+                } else {
+
+                    return null;
+                }
 
             }
 
@@ -226,6 +234,38 @@ public class KeywordConfigurationUtil {
         // If nothing matches, then return null
         return null;
 
+    }
+
+
+    /**
+     * Method to check if the keyword is valid after removing the subject part
+     * If the subject after removing the current key does not start with the empty string,
+     * it means that the key is no matching for the keyword in the inbound request
+     *
+     * @param compare   : The subject field to be compared
+     * @param key       : The currenct key being checked
+     *
+     * @return          : false if the compare string still has got content after removing the key and is
+     *                    not starting with blank space
+     *                    true  otherwise
+     */
+    private boolean isKeywordValid(String compare, String key) {
+
+        //get the length of key
+        int length = key.length();
+
+        //get the part of the message excluding keyword
+        String nonKeywordPart = compare.substring(length);
+
+        //if non keyword part is not empty and not starts with blank space ,
+        //the keyword can be considered as invalid
+        if(nonKeywordPart.length()>0 && !nonKeywordPart.startsWith(" ")){
+
+            return false;
+        }
+
+        //return true
+        return true;
     }
 
 

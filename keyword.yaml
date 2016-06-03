@@ -2,27 +2,32 @@ keywords:
 - !!com.microideation.app.keywordpro.dictionary.Keyword
   key: 'REWARDS'
   fieldSeparator: '/' # separator spliting of the subject (This is the part of the subject after removing the key
-  minFieldCount : 3
+  minFieldCount : 1
   keywordSubjectFields:
   - !!com.microideation.app.keywordpro.dictionary.KeywordSubjectField
     index: 1
     mandatory: true
     length: 200
+    stripCharacters:
+    - 0
+    - 91
+    - 65
+    - +91
   - !!com.microideation.app.keywordpro.dictionary.KeywordSubjectField
     index: 2
-    mandatory: true
+    mandatory: false
     length: 200
   - !!com.microideation.app.keywordpro.dictionary.KeywordSubjectField
     index: 3
-    mandatory: true
+    mandatory: false
     length: 300
   - !!com.microideation.app.keywordpro.dictionary.KeywordSubjectField
     index: 4
-    mandatory: true
+    mandatory: false
     length: 300
   - !!com.microideation.app.keywordpro.dictionary.KeywordSubjectField
     index: 5
-    mandatory: true
+    mandatory: false
     length: 300
   apiMethod: 'POST'
   apiUrl: 'http://localhost:9090'
