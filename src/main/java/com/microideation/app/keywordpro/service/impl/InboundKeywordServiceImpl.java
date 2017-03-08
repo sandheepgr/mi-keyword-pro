@@ -49,6 +49,19 @@ public class InboundKeywordServiceImpl implements InboundKeywordService {
 
 
     /**
+     * Method to process the inbound sms request based on object passed
+     * @param inboundSMSRequest : The inbound sms request object containing the params for the object
+     * @return
+     */
+    public int processInboundSMS(InboundSMSRequest inboundSMSRequest) {
+
+        // Call the method to process to inbound sms reuest
+        return processInboundSMSRequest(inboundSMSRequest);
+
+    }
+
+
+    /**
      * The base method that starts the parsing and processing of the inbound SMS
      * based on the subject
      *
@@ -66,8 +79,24 @@ public class InboundKeywordServiceImpl implements InboundKeywordService {
         // Get the request
         InboundSMSRequest inboundSMSRequest = getInboundSMSRequest(mobile,subject,accessCode);
 
+        // Call the method to process to inbound sms reuest
+        return processInboundSMSRequest(inboundSMSRequest);
+
+    }
+
+
+    /**
+     * Method to process the inbound sms request
+     * @param inboundSMSRequest : The object with the informationf or the inboundSMSRequest
+     * @return              : Return the status based on the process
+     *                        PROCESSED if the sms was processed successfully
+     *                        INVALID_KEYWORD : if the keyword is not able to be mapped
+     *                        INVALID_FORMAT  : if the format of the fields is not proper for the keyword
+     */
+    private int processInboundSMSRequest(InboundSMSRequest inboundSMSRequest) {
+
         // get the keyword for the SMS
-        Keyword keyword = getConfigForKey(subject);
+        Keyword keyword = getConfigForKey(inboundSMSRequest.getSmsText());
 
         // If the keyword is null, then return invalid keyword status
         if ( keyword == null ) {
@@ -89,7 +118,7 @@ public class InboundKeywordServiceImpl implements InboundKeywordService {
         if ( !isValid ) {
 
             // Log the infor
-            log.info("processInboundSMS : Validation is not valid : " + keyword);
+            log.info("processInboundSMSRequest : Validation is not valid : " + keyword);
 
             // Return the control
             return InboundSMSKeywordStatus.INVALID_FORMAT;
@@ -100,7 +129,7 @@ public class InboundKeywordServiceImpl implements InboundKeywordService {
         String response = placeAPICall(keyword,inboundSMSRequest);
 
         // Log the response
-        log.info("processInboundSMS : Response : "  + response + " : Keyword : " + keyword);
+        log.info("processInboundSMSRequest : Response : "  + response + " : Keyword : " + keyword);
 
         // finally return as processed
         return InboundSMSKeywordStatus.PROCESSED;
@@ -318,6 +347,20 @@ public class InboundKeywordServiceImpl implements InboundKeywordService {
 
         }
 
+        // Check if the reqConstParams are set
+        if ( inboundSMSRequest.getReqConstParams() != null &&
+                inboundSMSRequest.getReqConstParams().size() > 0) {
+
+            // Iterate through the entries and put in the metaParams
+            for (Map.Entry<String,String> entry: inboundSMSRequest.getReqConstParams().entrySet()) {
+
+                // Add to the metaParams
+                metaParams.put(entry.getKey(),entry.getValue());
+
+            }
+
+        }
+
         // Set the metaparams in the inboundSMSReqest
         inboundSMSRequest.setMetaParams(metaParams);
 
@@ -506,24 +549,24 @@ public class InboundKeywordServiceImpl implements InboundKeywordService {
 
             case "post":
 
-                response = apiService.placeRestPostAPICall(url,mappings);
+                response = apiService.placeRestPostAPICall(url,mappings, inboundSMSRequest.getRestHeaders());
                 break;
 
             case "get":
 
-                response = apiService.placeRestGetAPICall(url, mappings);
+                response = apiService.placeRestGetAPICall(url, mappings, inboundSMSRequest.getRestHeaders());
                 break;
 
             case "post-query":
 
-                response = apiService.placeRestPostQueryStringAPICall(url, mappings);
+                response = apiService.placeRestPostQueryStringAPICall(url, mappings, inboundSMSRequest.getRestHeaders());
                 break;
 
             case "post-json":
 
                 try {
 
-                    response = apiService.placeRestJSONPostAPICall(url, mapper.writeValueAsString(mappings));
+                    response = apiService.placeRestJSONPostAPICall(url, mapper.writeValueAsString(mappings), inboundSMSRequest.getRestHeaders());
 
                 } catch (JsonProcessingException e) {
 

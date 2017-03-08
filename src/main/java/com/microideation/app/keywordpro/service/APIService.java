@@ -7,10 +7,10 @@ import java.util.Map;
  */
 public interface APIService {
 
-    public String placeRestGetAPICall(String url, Map<String, String> variables);
-    public String placeRestPostAPICall(String url, Map<String, String> params);
-    public String placeRestJSONPostAPICall(String url, String json);
-    public String placeRestPostQueryStringAPICall(String url, Map<String, String> variables);
+    public String placeRestGetAPICall(String url, Map<String, String> variables, Map<String, String> headers);
+    public String placeRestPostAPICall(String url, Map<String, String> params, Map<String, String> headers);
+    public String placeRestJSONPostAPICall(String url, String json, Map<String, String> headers);
+    public String placeRestPostQueryStringAPICall(String url, Map<String, String> variables, Map<String, String> headers);
 
 
 }

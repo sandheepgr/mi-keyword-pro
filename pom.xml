@@ -5,7 +5,7 @@
 
 	<groupId>com.microideation.app.sms.keywordprocessor</groupId>
 	<artifactId>mi-keyword-pro</artifactId>
-	<version>1.0.3</version>
+	<version>1.0.4</version>
 	<packaging>jar</packaging>
 
 	<name>mi-keyword-pro</name>
@@ -27,6 +27,8 @@
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<java.version>1.8</java.version>
+        <maven.compiler.source>1.8</maven.compiler.source>
+        <maven.compiler.target>1.8</maven.compiler.target>
 	</properties>
 
     <dependencyManagement>

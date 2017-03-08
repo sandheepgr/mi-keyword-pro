@@ -24,6 +24,10 @@ public class InboundSMSRequest {
 
     private List<String> subjectFields;
 
+    private HashMap<String,String> restHeaders;
+
+    private HashMap<String,String> reqConstParams;
+
     public String getTransId() {
         return transId;
     }
@@ -88,6 +92,22 @@ public class InboundSMSRequest {
         this.metaParams = metaParams;
     }
 
+    public HashMap<String, String> getRestHeaders() {
+        return restHeaders;
+    }
+
+    public void setRestHeaders(HashMap<String, String> restHeaders) {
+        this.restHeaders = restHeaders;
+    }
+
+    public HashMap<String, String> getReqConstParams() {
+        return reqConstParams;
+    }
+
+    public void setReqConstParams(HashMap<String, String> reqConstParams) {
+        this.reqConstParams = reqConstParams;
+    }
+
     @Override
     public String toString() {
         return "InboundSMSRequest{" +
@@ -99,6 +119,8 @@ public class InboundSMSRequest {
                 ", transId='" + transId + '\'' +
                 ", metaParams=" + metaParams +
                 ", subjectFields=" + subjectFields +
+                ", restHeaders=" + restHeaders +
+                ", reqConstParams=" + reqConstParams +
                 '}';
     }
 }
